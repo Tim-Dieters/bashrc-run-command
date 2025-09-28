@@ -86,13 +86,13 @@ run_npm() {
 # backend functions
 ensure_project_name() {
   if [[ ! -f .my-nano-config ]]; then
-    read -p "Voer projectnaam in: " pname
+    read -p "Enter a project name: " pname
     if [[ -z "$pname" ]]; then
-      echo "Geen projectnaam opgegeven. Gestopt."
+      echo "Project name cannot be empty. Aborting."
       return 1
     fi
     echo "$pname" > .my-nano-config
-    echo "Projectnaam ingesteld op '$pname'"
+    echo "Saved project name to .my-nano-config: '$pname'"
   fi
   project_naam=$(<.my-nano-config)
   echo "$project_naam"
@@ -118,7 +118,6 @@ stop_symfony() {
 
   project_naam=$(ensure_project_name) || return 1
 
-  echo "Stopping Symfony server and Docker..."
   symfony server:stop
   docker-compose -p "$project_naam" down
   echo "Stopped"
@@ -173,4 +172,3 @@ run() {
       ;;
   esac
 }
-
