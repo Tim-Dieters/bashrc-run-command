@@ -126,8 +126,10 @@ stop_symfony() {
 
 # commands
 alias c="php bin/console"
+run() { _run_body "$@"; }
+r()   { _run_body "$@"; }
 
-run() {
+_run_body() {
   case "$1" in
     config|c)
       code "$HOME/.bashrc"
