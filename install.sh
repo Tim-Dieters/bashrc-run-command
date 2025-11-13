@@ -8,13 +8,6 @@ echo ""
 BASE_URL="https://raw.githubusercontent.com/Tim-Dieters/bashrc-run-command/refs/heads/main"
 BASHRC_DIR="$HOME/.bashrc.d"
 
-FILES=(
-  ".bashrc.d/utils.sh"
-  ".bashrc.d/frontend.sh"
-  ".bashrc.d/backend.sh"
-  ".bashrc.d/update.sh"
-)
-
 REMOTE_BASHRC="bashrc"     # File in repo
 LOCAL_BASHRC=".bashrc"     # File name to install locally
 
@@ -39,14 +32,44 @@ fi
 echo "Creating directory: $BASHRC_DIR"
 mkdir -p "$BASHRC_DIR"
 
+# Download index.json to determine which files to install
+echo ""
+echo "Fetching installation index..."
+INDEX_URL="$BASE_URL/.bashrc.d/index.json"
+TEMP_INDEX=$(mktemp)
+
+if curl -sS -f "$INDEX_URL" -o "$TEMP_INDEX"; then
+  echo "  ✓ Retrieved index.json"
+else
+  echo "  ✗ Failed to download index.json"
+  rm -f "$TEMP_INDEX"
+  exit 1
+fi
+
+# Parse JSON to get file list (using basic grep/sed since jq might not be available)
+FILES=()
+while IFS= read -r line; do
+  if [[ "$line" =~ \"([^\"]+\.sh)\" ]]; then
+    FILES+=("${BASH_REMATCH[1]}")
+  fi
+done < "$TEMP_INDEX"
+rm -f "$TEMP_INDEX"
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "  ✗ No files found in index.json"
+  exit 1
+fi
+
+echo "  Found ${#FILES[@]} module(s) to install"
+
 # Download all modular scripts
 echo ""
 echo "Downloading modular scripts..."
 for file in "${FILES[@]}"; do
-  local_file="$HOME/$file"
-  remote_url="$BASE_URL/$file"
+  local_file="$BASHRC_DIR/$file"
+  remote_url="$BASE_URL/.bashrc.d/$file"
   
-  echo "  - Downloading $(basename "$file")..."
+  echo "  - Downloading $file..."
   if curl -sS -f "$remote_url" -o "$local_file"; then
     chmod +x "$local_file"
     echo "    ✓ Successfully downloaded"
