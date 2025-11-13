@@ -1,0 +1,8 @@
+{
+  "files": [
+    "utils.sh",
+    "frontend.sh",
+    "backend.sh",
+    "update.sh"
+  ]
+}
