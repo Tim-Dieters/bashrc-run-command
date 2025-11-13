@@ -15,18 +15,19 @@ FILES=(
   ".bashrc.d/update.sh"
 )
 
-BASHRC_FILE="bashrc"
+REMOTE_BASHRC="bashrc"     # File in repo
+LOCAL_BASHRC=".bashrc"     # File name to install locally
 
 echo "This will install the bashrc-run-command system to your home directory."
 echo "Installation directory: $HOME"
 echo ""
 
 # Check if .bashrc already exists
-if [[ -f "$HOME/.bashrc" ]]; then
+if [[ -f "$HOME/$LOCAL_BASHRC" ]]; then
   read -p ".bashrc already exists. Do you want to backup and replace it? (y/n) " confirm
   if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     backup_file="$HOME/.bashrc.backup.$(date +%Y%m%d_%H%M%S)"
-    cp "$HOME/.bashrc" "$backup_file"
+    cp "$HOME/$LOCAL_BASHRC" "$backup_file"
     echo "Backed up existing .bashrc to: $backup_file"
   else
     echo "Installation cancelled."
@@ -58,7 +59,7 @@ done
 # Download main .bashrc file
 echo ""
 echo "Downloading main .bashrc file..."
-if curl -sS -f "$BASE_URL/$BASHRC_FILE" -o "$HOME/$BASHRC_FILE"; then
+if curl -sS -f "$BASE_URL/$REMOTE_BASHRC" -o "$HOME/$LOCAL_BASHRC"; then
   echo "  ✓ Successfully downloaded .bashrc"
 else
   echo "  ✗ Failed to download .bashrc"
