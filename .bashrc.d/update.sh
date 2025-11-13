@@ -6,11 +6,10 @@ run_update() {
   
   # Fetch the index.json to get the list of files
   local index_url="$base_url/.bashrc.d/index.json"
-  local temp_index=$(mktemp)
+  local local_index="$HOME/.bashrc.d/index.json"
   
-  if ! curl -sS -f "$index_url" -o "$temp_index" 2>/dev/null; then
+  if ! curl -sS -f "$index_url" -o "$local_index" 2>/dev/null; then
     echo "Error: Could not fetch index.json from repository"
-    rm -f "$temp_index"
     return 1
   fi
   
@@ -20,8 +19,7 @@ run_update() {
     if [[ "$line" =~ \"([^\"]+\.sh)\" ]]; then
       module_files+=(".bashrc.d/${BASH_REMATCH[1]}")
     fi
-  done < "$temp_index"
-  rm -f "$temp_index"
+  done < "$local_index"
   
   # Add .bashrc to the files list
   local files=(

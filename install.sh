@@ -7,20 +7,18 @@ echo ""
 
 BASE_URL="https://raw.githubusercontent.com/Tim-Dieters/bashrc-run-command/refs/heads/main"
 BASHRC_DIR="$HOME/.bashrc.d"
-
-REMOTE_BASHRC="bashrc"     # File in repo
-LOCAL_BASHRC=".bashrc"     # File name to install locally
+BASHRC_FILE=".bashrc"
 
 echo "This will install the bashrc-run-command system to your home directory."
 echo "Installation directory: $HOME"
 echo ""
 
 # Check if .bashrc already exists
-if [[ -f "$HOME/$LOCAL_BASHRC" ]]; then
+if [[ -f "$HOME/$BASHRC_FILE" ]]; then
   read -p ".bashrc already exists. Do you want to backup and replace it? (y/n) " confirm
   if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     backup_file="$HOME/.bashrc.backup.$(date +%Y%m%d_%H%M%S)"
-    cp "$HOME/$LOCAL_BASHRC" "$backup_file"
+    cp "$HOME/$BASHRC_FILE" "$backup_file"
     echo "Backed up existing .bashrc to: $backup_file"
   else
     echo "Installation cancelled."
@@ -36,13 +34,12 @@ mkdir -p "$BASHRC_DIR"
 echo ""
 echo "Fetching installation index..."
 INDEX_URL="$BASE_URL/.bashrc.d/index.json"
-TEMP_INDEX=$(mktemp)
+LOCAL_INDEX="$BASHRC_DIR/index.json"
 
-if curl -sS -f "$INDEX_URL" -o "$TEMP_INDEX"; then
+if curl -sS -f "$INDEX_URL" -o "$LOCAL_INDEX"; then
   echo "  ✓ Retrieved index.json"
 else
   echo "  ✗ Failed to download index.json"
-  rm -f "$TEMP_INDEX"
   exit 1
 fi
 
@@ -52,8 +49,7 @@ while IFS= read -r line; do
   if [[ "$line" =~ \"([^\"]+\.sh)\" ]]; then
     FILES+=("${BASH_REMATCH[1]}")
   fi
-done < "$TEMP_INDEX"
-rm -f "$TEMP_INDEX"
+done < "$LOCAL_INDEX"
 
 if [[ ${#FILES[@]} -eq 0 ]]; then
   echo "  ✗ No files found in index.json"
@@ -82,7 +78,7 @@ done
 # Download main .bashrc file
 echo ""
 echo "Downloading main .bashrc file..."
-if curl -sS -f "$BASE_URL/$REMOTE_BASHRC" -o "$HOME/$LOCAL_BASHRC"; then
+if curl -sS -f "$BASE_URL/$BASHRC_FILE" -o "$HOME/$BASHRC_FILE"; then
   echo "  ✓ Successfully downloaded .bashrc"
 else
   echo "  ✗ Failed to download .bashrc"
@@ -94,10 +90,9 @@ echo "================================"
 echo "Installation complete!"
 echo "================================"
 echo ""
-echo "To start using the commands, run:"
-echo "  source ~/.bashrc"
-echo ""
-echo "Or simply restart your terminal."
+echo "Reloading .bashrc..."
+source "$HOME/.bashrc"
+echo "✓ .bashrc loaded successfully!"
 echo ""
 echo "Type 'run help' to see available commands."
 echo ""
