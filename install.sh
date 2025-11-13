@@ -15,7 +15,7 @@ FILES=(
   ".bashrc.d/update.sh"
 )
 
-BASHRC_FILE=".bashrc"
+BASHRC_FILE="bashrc"
 
 echo "This will install the bashrc-run-command system to your home directory."
 echo "Installation directory: $HOME"
