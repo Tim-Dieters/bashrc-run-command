@@ -14,14 +14,16 @@ run_update() {
   local temp_dir=$(mktemp -d)
   local has_updates=false
   local update_list=()
+  local downloaded_files=()
   
   # Check each file for updates
   for file in "${files[@]}"; do
     local remote_url="$base_url/$file"
     local local_file="$HOME/$file"
-    local temp_file="$temp_dir/$(basename "$file")"
+    local temp_file="$temp_dir/$(basename "$file")-${file//\//_}"
     
-    if curl -sS "$remote_url" -o "$temp_file" 2>/dev/null; then
+    if curl -sS -f "$remote_url" -o "$temp_file" 2>/dev/null; then
+      downloaded_files+=("$file:$temp_file")
       if [[ -f "$local_file" ]]; then
         if ! diff -q "$local_file" "$temp_file" >/dev/null 2>&1; then
           has_updates=true
@@ -31,6 +33,8 @@ run_update() {
         has_updates=true
         update_list+=("$file (new)")
       fi
+    else
+      echo "Warning: Could not fetch $file from GitHub (may not exist in repository yet)"
     fi
   done
   
@@ -49,10 +53,10 @@ run_update() {
   read -p "Do you want to update? (y/n) " confirm
   if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     # Apply updates
-    for file in "${files[@]}"; do
-      local remote_url="$base_url/$file"
+    for entry in "${downloaded_files[@]}"; do
+      local file="${entry%%:*}"
+      local temp_file="${entry#*:}"
       local local_file="$HOME/$file"
-      local temp_file="$temp_dir/$(basename "$file")"
       
       if [[ -f "$temp_file" ]]; then
         # Create directory if needed

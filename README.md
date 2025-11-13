@@ -1,2 +1,6 @@
-1. Add the code to the .bashrc file in `C:\Users\youruser\.bashrc` directory.
-2. In your terminal enter `source ~/.bashrc`.
+### Install via Bash
+
+You can install the script by running:
+
+```bash
+bash <(curl -sS https://raw.githubusercontent.com/Tim-Dieters/bashrc-run-command/refs/heads/main/install.sh)
