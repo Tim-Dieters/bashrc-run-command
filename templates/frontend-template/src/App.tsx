@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { store } from "./Redux/Store";
 
 import MainPage from "./Pages/Main/MainPage";
+import Page404 from "./Pages/Main/Page404";
 
 function App() {
   return (

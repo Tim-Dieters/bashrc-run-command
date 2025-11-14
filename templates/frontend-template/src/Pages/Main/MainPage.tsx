@@ -1,7 +1,7 @@
 const MainPage = () => {
     return (
         <>
-            Moi
+            Hello world
         </>
     );
 };
