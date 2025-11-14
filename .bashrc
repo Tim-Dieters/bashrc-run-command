@@ -13,8 +13,8 @@ fi
 alias    c="php bin/console"
 run()    { _run_body "$@"; }
 r()      { _run_body "$@"; }
-runrun() { NO_BROWSER=1 _run_body "$@"; }
-rr()     { NO_BROWSER=1 _run_body "$@"; }
+-run() { NO_BROWSER=1 _run_body "$@"; }
+-r()     { NO_BROWSER=1 _run_body "$@"; }
 
 _run_body() {
   if [[ -z "$1" ]]; then
@@ -23,46 +23,40 @@ _run_body() {
   fi
 
   case "$1" in
-    help|h)
+    help)
       echo "Available commands:"
       echo ""
       echo "Main aliases:"
-      echo "  run   | r      - Execute commands (opens browser when applicable)"
-      echo "  runrun| rr     - Execute commands without opening browser"
+      echo "  run  | r       - Execute commands (opens browser)"
+      echo "  -run | -r      - Execute commands without opening browser"
       echo ""
       echo "Commands:"
-      echo "  config  | c    - Edit .bashrc configuration file"
-      echo "  reload  | r    - Reload .bashrc to apply changes"
-      echo "  update  | u    - Check for and install updates from GitHub"
-      echo "  frontend| f    - Start frontend development server (port 5173)"
-      echo "  backend | b    - Start backend with Docker and Symfony server (Automatically checks and starts Docker if needed)"
-      echo "  stop    | s    - Stop services:"
-      echo "                   - 'stop backend' or 's b' - Stop backend and Docker"
-      echo "  credits | c    - Open the creator's site"
-      echo "  help    | h    - Show this help message"
+      echo "  config          - Edit .bashrc configuration file"
+      echo "  reload          - Reload .bashrc to apply changes"
+      echo "  update          - Check for and install updates from GitHub"
+      echo "  frontend | f    - Start frontend development server (port 5173)"
+      echo "  backend  | b    - Start backend with Docker and Symfony server (Automatically checks and starts Docker if needed)"
+      echo "  create   | c    - Create new projects:"
+      echo "                    - frontend | f    - Create Vite + React + TypeScript project"
+      echo "  stop     | s    - Stop services:"
+      echo "                    - backend  | b    - Stop backend and Docker"
+      echo "  credits         - Open the creator's site"
+      echo "  help            - Show this help message"
       ;;
 
 
 
-    config|c)
+    config)
       code "$HOME/.bashrc.d"
       code "$HOME/.bashrc"
       ;;
 
-    reload|r)
+    reload)
       source ~/.bashrc
       echo "Reloaded .bashrc"
       ;;
 
-    goat|g)
-      open_browser "https://www.youtube.com/watch?v=Qy0beYgk1Ds&t=2s"
-      ;;
-
-    credits|c)
-      open_browser "https://timdieters.nl"
-      ;;
-
-    update|u)
+    update)
       run_update
       ;;
 
@@ -72,6 +66,18 @@ _run_body() {
 
     backend|b)
       run_project "composer.json" run_symfony
+      ;;
+
+    create|c)
+      case "$2" in
+        frontend|f)
+          create_vite_project
+          ;;
+        *)
+          echo "Unknown create target: $2"
+          return 1
+          ;;
+      esac
       ;;
 
     stop|s)
@@ -84,6 +90,14 @@ _run_body() {
           return 1
           ;;
       esac
+      ;;
+
+    goat)
+      open_browser "https://www.youtube.com/watch?v=Qy0beYgk1Ds&t=2s"
+      ;;
+
+    credits)
+      open_browser "https://timdieters.nl"
       ;;
 
     *)
