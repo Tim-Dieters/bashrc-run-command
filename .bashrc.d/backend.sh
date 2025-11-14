@@ -92,3 +92,60 @@ stop_symfony() {
   docker-compose -p "$project_naam" down
   echo "Stopped"
 }
+
+create_symfony_project() {
+  read -p "Enter project name: " project_name
+  if [[ -z "$project_name" ]]; then
+    echo "Project name cannot be empty. Aborting." >&2
+    return 1
+  fi
+
+  if [[ -d "$project_name" ]]; then
+    echo "Error: Directory '$project_name' already exists." >&2
+    return 1
+  fi
+
+  echo "  Creating Symfony project: $project_name"
+  echo ""
+
+  symfony new "$project_name" --webapp
+
+  if [[ $? -eq 0 ]]; then
+    echo "Symfony project created successfully!"
+    cd "$project_name" || return 1
+
+    echo "$project_name" > .my-nano-config
+
+    echo "Setting up Docker configuration..."
+
+    rm -rf compose.override.yaml
+
+    local base_url="https://raw.githubusercontent.com/Tim-Dieters/bashrc-run-command/refs/heads/main/templates"
+    curl -sS -f "$base_url/compose.override.yaml" -o "compose.override.yaml"
+    
+    if [[ $? -ne 0 ]]; then
+      echo "Error: Could not download compose.override.yaml from GitHub" >&2
+      return 1
+    fi
+
+    if [[ -f .env ]]; then
+      if grep -q "^DATABASE_URL=" .env; then
+        sed -i 's|^DATABASE_URL=.*|DATABASE_URL="mysql://root:rootpass@127.0.0.1:3306/app"|' .env
+      else
+        echo "" >> .env
+        echo "# Database Configuration" >> .env
+        echo "DATABASE_URL=\"mysql://root:rootpass@127.0.0.1:3306/app\"" >> .env
+      fi
+    fi
+
+    echo ""
+    echo "✓ Project setup complete!"
+    echo "Starting dev server..."
+    echo ""
+
+    run backend
+  else
+    echo "Error: Failed to create Symfony project." >&2
+    return 1
+  fi
+}

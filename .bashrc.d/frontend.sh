@@ -21,7 +21,7 @@ create_vite_project() {
   echo "Creating Vite + React + TypeScript project: $project_name"
   echo ""
   echo "========================================================================================================================"
-  echo -e "\033[0;31mVite may ask you to preform additional steps during setup, we reccommend skipping them to avoid issues with our process.\033[0m"
+  echo -e "\033[0;33mVite may ask you to preform additional steps during setup, we reccommend skipping them to avoid issues with our process.\033[0m"
   echo "The installation will continue automatically in 5 seconds."
   echo "========================================================================================================================"
   sleep 5
