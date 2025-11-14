@@ -38,6 +38,7 @@ _run_body() {
       echo "  backend  | b    - Start backend with Docker and Symfony server (Automatically checks and starts Docker if needed)"
       echo "  create   | c    - Create new projects:"
       echo "                    - frontend | f    - Create Vite + React + TypeScript project"
+      echo "                    - backend  | b    - Create Symfony project"
       echo "  stop     | s    - Stop services:"
       echo "                    - backend  | b    - Stop backend and Docker"
       echo "  credits         - Open the creator's site"
@@ -72,6 +73,9 @@ _run_body() {
       case "$2" in
         frontend|f)
           create_vite_project
+          ;;
+        backend|b)
+          create_symfony_project
           ;;
         *)
           echo "Unknown create target: $2"
