@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+    --color-brand: #FFFFFF;
+}
+
+body {
+  @apply overflow-x-clip;
+}
