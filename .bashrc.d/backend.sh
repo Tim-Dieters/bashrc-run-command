@@ -94,16 +94,8 @@ stop_symfony() {
 }
 
 create_symfony_project() {
-  read -p "Enter project name: " project_name
-  if [[ -z "$project_name" ]]; then
-    echo "Project name cannot be empty. Aborting." >&2
-    return 1
-  fi
-
-  if [[ -d "$project_name" ]]; then
-    echo "Error: Directory '$project_name' already exists." >&2
-    return 1
-  fi
+  local project_name
+  project_name=$(get_project_name "Enter project name") || return 1
 
   echo "  Creating Symfony project: $project_name"
   echo ""
@@ -121,22 +113,9 @@ create_symfony_project() {
     rm -rf compose.override.yaml
 
     local base_url="https://raw.githubusercontent.com/Tim-Dieters/bashrc-run-command/refs/heads/main/templates"
-    curl -sS -f "$base_url/compose.override.yaml" -o "compose.override.yaml"
-    
-    if [[ $? -ne 0 ]]; then
-      echo "Error: Could not download compose.override.yaml from GitHub" >&2
-      return 1
-    fi
+    download_github_file "$base_url/compose.override.yaml" "compose.override.yaml" || return 1
 
-    if [[ -f .env ]]; then
-      if grep -q "^DATABASE_URL=" .env; then
-        sed -i 's|^DATABASE_URL=.*|DATABASE_URL="mysql://root:rootpass@127.0.0.1:3306/app"|' .env
-      else
-        echo "" >> .env
-        echo "# Database Configuration" >> .env
-        echo "DATABASE_URL=\"mysql://root:rootpass@127.0.0.1:3306/app\"" >> .env
-      fi
-    fi
+    update_env_variable ".env" "DATABASE_URL" "mysql://root:rootpass@127.0.0.1:3306/app" || return 1
 
     echo ""
     echo "✓ Project setup complete!"
