@@ -10,11 +10,11 @@ fi
 
 
 # commands
-alias    c="php bin/console"
-run()    { _run_body "$@"; }
-r()      { _run_body "$@"; }
--run() { NO_BROWSER=1 _run_body "$@"; }
--r()     { NO_BROWSER=1 _run_body "$@"; }
+alias      c="php bin/console"
+run()      { _run_body "$@"; }
+r()        { _run_body "$@"; }
+runclean() { NO_BROWSER=1 _run_body "$@"; }
+rc()       { NO_BROWSER=1 _run_body "$@"; }
 
 _run_body() {
   if [[ -z "$1" ]]; then
@@ -27,8 +27,8 @@ _run_body() {
       echo "Available commands:"
       echo ""
       echo "Main aliases:"
-      echo "  run  | r       - Execute commands (opens browser)"
-      echo "  -run | -r      - Execute commands without opening browser"
+      echo "  run      | r    - Execute commands (opens browser)"
+      echo "  runclean | rc   - Execute commands without opening browser"
       echo ""
       echo "Commands:"
       echo "  config          - Edit .bashrc configuration file"

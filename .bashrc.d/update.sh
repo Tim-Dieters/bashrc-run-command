@@ -8,10 +8,10 @@ run_update() {
   local index_url="$base_url/.bashrc.d/index.json"
   local local_index="$HOME/.bashrc.d/index.json"
   
-  if ! curl -sS -f "$index_url" -o "$local_index" 2>/dev/null; then
+  download_github_file "$index_url" "$local_index" true || {
     echo "Error: Could not fetch index.json from repository"
     return 1
-  fi
+  }
   
   # Parse JSON to get file list (using basic grep/sed since jq might not be available)
   local module_files=()
@@ -66,7 +66,7 @@ run_update() {
     local local_file="$HOME/$file"
     local temp_file="$temp_dir/$(basename "$file")-${file//\//_}"
     
-    if curl -sS -f "$remote_url" -o "$temp_file" 2>/dev/null; then
+    if download_github_file "$remote_url" "$temp_file" false; then
       downloaded_files+=("$file:$temp_file")
       if [[ -f "$local_file" ]]; then
         if ! diff -q "$local_file" "$temp_file" >/dev/null 2>&1; then
@@ -94,8 +94,7 @@ run_update() {
   done
   echo ""
   
-  read -p "Do you want to update? (y/n) " confirm
-  if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+  if confirm_action "Do you want to update?"; then
     # Remove files that are no longer in the index
     for file in "${files_to_remove[@]}"; do
       local local_file="$HOME/$file"

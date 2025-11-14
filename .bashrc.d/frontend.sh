@@ -7,16 +7,8 @@ run_npm() {
 }
 
 create_vite_project() {
-  read -p "Enter project name: " project_name
-  if [[ -z "$project_name" ]]; then
-    echo "Project name cannot be empty. Aborting." >&2
-    return 1
-  fi
-
-  if [[ -d "$project_name" ]]; then
-    echo "Error: Directory '$project_name' already exists." >&2
-    return 1
-  fi
+  local project_name
+  project_name=$(get_project_name "Enter project name") || return 1
 
   echo "Creating Vite + React + TypeScript project: $project_name"
   echo ""
@@ -49,31 +41,31 @@ create_vite_project() {
     mkdir -p public
     
     # Download root files
-    curl -sS -f "$base_url/.env" -o ".env"
-    curl -sS -f "$base_url/index.html" -o "index.html"
-    curl -sS -f "$base_url/vite.config.ts" -o "vite.config.ts"
+    download_github_file "$base_url/.env" ".env" || return 1
+    download_github_file "$base_url/index.html" "index.html" || return 1
+    download_github_file "$base_url/vite.config.ts" "vite.config.ts" || return 1
     
     # Download src files
-    curl -sS -f "$base_url/src/main.tsx" -o "src/main.tsx"
-    curl -sS -f "$base_url/src/App.tsx" -o "src/App.tsx"
-    curl -sS -f "$base_url/src/index.css" -o "src/index.css"
-    curl -sS -f "$base_url/src/vite-env.d.ts" -o "src/vite-env.d.ts"
+    download_github_file "$base_url/src/main.tsx" "src/main.tsx" || return 1
+    download_github_file "$base_url/src/App.tsx" "src/App.tsx" || return 1
+    download_github_file "$base_url/src/index.css" "src/index.css" || return 1
+    download_github_file "$base_url/src/vite-env.d.ts" "src/vite-env.d.ts" || return 1
     
     # Download Pages
-    curl -sS -f "$base_url/src/Pages/PageWrapper.tsx" -o "src/Pages/PageWrapper.tsx"
-    curl -sS -f "$base_url/src/Pages/Main/MainPage.tsx" -o "src/Pages/Main/MainPage.tsx"
-    curl -sS -f "$base_url/src/Pages/Main/Page404.tsx" -o "src/Pages/Main/Page404.tsx"
+    download_github_file "$base_url/src/Pages/PageWrapper.tsx" "src/Pages/PageWrapper.tsx" || return 1
+    download_github_file "$base_url/src/Pages/Main/MainPage.tsx" "src/Pages/Main/MainPage.tsx" || return 1
+    download_github_file "$base_url/src/Pages/Main/Page404.tsx" "src/Pages/Main/Page404.tsx" || return 1
     
     # Download Redux files
-    curl -sS -f "$base_url/src/Redux/Store.ts" -o "src/Redux/Store.ts"
-    curl -sS -f "$base_url/src/Redux/Api/Api.ts" -o "src/Redux/Api/Api.ts"
-    curl -sS -f "$base_url/src/Redux/Api/TestCall/TestCall.ts" -o "src/Redux/Api/TestCall/TestCall.ts"
-    curl -sS -f "$base_url/src/Redux/Api/TestCall/Types.ts" -o "src/Redux/Api/TestCall/Types.ts"
-    curl -sS -f "$base_url/src/Redux/Slices/Test.ts" -o "src/Redux/Slices/Test.ts"
+    download_github_file "$base_url/src/Redux/Store.ts" "src/Redux/Store.ts" || return 1
+    download_github_file "$base_url/src/Redux/Api/Api.ts" "src/Redux/Api/Api.ts" || return 1
+    download_github_file "$base_url/src/Redux/Api/TestCall/TestCall.ts" "src/Redux/Api/TestCall/TestCall.ts" || return 1
+    download_github_file "$base_url/src/Redux/Api/TestCall/Types.ts" "src/Redux/Api/TestCall/Types.ts" || return 1
+    download_github_file "$base_url/src/Redux/Slices/Test.ts" "src/Redux/Slices/Test.ts" || return 1
     
     # Download public files
-    curl -sS -f "$base_url/public/_redirects" -o "public/_redirects"
-    curl -sS -f "$base_url/public/robots.txt" -o "public/robots.txt"
+    download_github_file "$base_url/public/_redirects" "public/_redirects" || return 1
+    download_github_file "$base_url/public/robots.txt" "public/robots.txt" || return 1
     
     echo "Template files downloaded successfully!"
     
