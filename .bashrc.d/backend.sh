@@ -74,8 +74,9 @@ run_symfony() {
   docker-compose -p "$project_naam" up -d
 
   echo "Waiting for Docker services to start..."
-  sleep 1
+  sleep 2
 
+  open_browser "http://localhost:8025"
   open_browser "http://localhost:8080/index.php?route=/database/structure&db=app"
   open_browser "http://localhost:8000/_profiler"
 
