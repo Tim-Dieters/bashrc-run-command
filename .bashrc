@@ -11,6 +11,7 @@ fi
 
 # commands
 alias      c="php bin/console"
+alias      py="python"
 run()      { _run_body "$@"; }
 r()        { _run_body "$@"; }
 runclean() { NO_BROWSER=1 _run_body "$@"; }
@@ -43,6 +44,10 @@ _run_body() {
       echo "                    - backend  | b    - Stop backend and Docker"
       echo "  credits         - Open the creator's site"
       echo "  help            - Show this help message"
+      echo ""
+      echo "Secondary aliases:"
+      echo "  c               - Alias for 'php bin/console'"
+      echo "  py              - Alias for 'python'"
       ;;
 
 
