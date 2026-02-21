@@ -5,16 +5,16 @@ setup_project() {
     echo "No script name provided."
     return 1
   fi
-  echo "$script_name" > ~/.my-nano-config
-  echo "Saved '$script_name' to ~/.my-nano-config"
+  echo "$script_name" > .my-nano-config
+  echo "Saved '$script_name' to .my-nano-config"
 }
 
 run_project_python() {
-  if [[ ! -f ~/.my-nano-config ]]; then
+  if [[ ! -f .my-nano-config ]]; then
     echo ".my-nano-config not found. Run 'py s' to set up first."
     return 1
   fi
-  script_name=$(cat ~/.my-nano-config)
+  script_name=$(cat .my-nano-config)
   if [[ ! -f "$script_name" ]]; then
     echo "Script file '$script_name' not found."
     return 1
