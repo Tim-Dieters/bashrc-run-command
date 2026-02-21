@@ -3,6 +3,7 @@
     "utils.sh",
     "frontend.sh",
     "backend.sh",
-    "update.sh"
+    "update.sh",
+    "python.sh"
   ]
 }
