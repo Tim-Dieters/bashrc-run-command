@@ -10,11 +10,13 @@ fi
 
 
 # commands
-alias      c="php bin/console"
 run()      { _run_body "$@"; }
 r()        { _run_body "$@"; }
 runclean() { NO_BROWSER=1 _run_body "$@"; }
 rc()       { NO_BROWSER=1 _run_body "$@"; }
+
+alias      c="php bin/console"
+py()       { _python_body "$@"; }
 
 _run_body() {
   if [[ -z "$1" ]]; then
@@ -30,7 +32,7 @@ _run_body() {
       echo "  run      | r    - Execute commands (opens browser)"
       echo "  runclean | rc   - Execute commands without opening browser"
       echo ""
-      echo "Commands:"
+      echo "Run commands:"
       echo "  config          - Edit .bashrc configuration file"
       echo "  reload          - Reload .bashrc to apply changes"
       echo "  update          - Check for and install updates from GitHub"
@@ -43,6 +45,15 @@ _run_body() {
       echo "                    - backend  | b    - Stop backend and Docker"
       echo "  credits         - Open the creator's site"
       echo "  help            - Show this help message"
+      echo ""
+      echo ""
+      echo ""
+      echo "Secondary aliases:"
+      echo "  php bin/console | c               - Alias for 'php bin/console'"
+      echo "  python          | py              - Python commands:"
+      echo "                                      - setup   | s    - Save your main Python script to config"
+      echo "                                      - run     | r    - Execute the saved Python script"
+      echo "                                      - install | i    - Run pyinstaller with found .spec file"
       ;;
 
 
@@ -108,6 +119,23 @@ _run_body() {
       echo "Not a valid command: $1"
       echo "Run 'run help' for a list of commands."
       return 1
+      ;;
+  esac
+}
+
+_python_body() {
+  case "$1" in
+    setup|s)
+      setup_project
+      ;;
+    run|r)
+      run_project_python
+      ;;
+    install|i)
+      install_project
+      ;;
+    *)
+      python "$@"
       ;;
   esac
 }
