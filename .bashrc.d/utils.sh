@@ -43,6 +43,16 @@ find_child_with() {
   return 1
 }
 
+find_all_dirs_with() {
+  local filename="$1"
+
+  for dir in */; do
+    if [[ -f "$dir/$filename" ]]; then
+      echo "${dir%/}"
+    fi
+  done
+}
+
 change_dir_if_needed() {
   local target_dir="$1"
   if [[ -n "$target_dir" ]]; then
@@ -59,17 +69,22 @@ run_project() {
     return
   fi
 
-  local dir
-  dir=$(find_child_with "$filename")
-  if [[ -n "$dir" ]]; then
-    local dir_name=$(basename "$dir")
-    if confirm_action "Run project in child folder $dir_name?"; then
-      "$run_command" "$dir"
+  local dirs=()
+  mapfile -t dirs < <(find_all_dirs_with "$filename")
+
+  if [[ ${#dirs[@]} -eq 1 ]]; then
+    "$run_command" "${dirs[0]}"
+    return
+  fi
+
+  if [[ ${#dirs[@]} -gt 1 ]]; then
+    if select_option "Choose folder to run:" "${dirs[@]}"; then
+      "$run_command" "$REPLY"
       return
-    else
-      echo "Stopped"
-      return 1
     fi
+
+    echo "Stopped"
+    return 1
   fi
 
   echo "No $filename found in current or child directories."
@@ -192,4 +207,74 @@ confirm_action() {
   trap - INT
   
   return $selected
+}
+
+select_option() {
+  local prompt="${1:-Choose an option}"
+  shift
+  local options=("$@")
+
+  if [[ ${#options[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  local selected=0
+
+  trap 'echo -ne "\r\033[K$prompt \033[31mCancelled\033[0m\n"; tput cnorm; trap - INT; return 1' INT
+  tput civis
+
+  while true; do
+    echo -ne "\r\033[K$prompt "
+
+    local i
+    for ((i = 0; i < ${#options[@]}; i++)); do
+      if [[ $i -eq $selected ]]; then
+        echo -ne "\033[7m ${options[$i]} \033[0m"
+      else
+        echo -ne " ${options[$i]} "
+      fi
+
+      if [[ $i -lt $(( ${#options[@]} - 1 )) ]]; then
+        echo -ne " / "
+      fi
+    done
+
+    read -rsn1 key
+
+    case "$key" in
+      $'\x1b')
+        read -rsn2 -t 0.1 key
+        if [[ -z "$key" ]]; then
+          echo -ne "\r\033[K$prompt \033[31mCancelled\033[0m\n"
+          tput cnorm
+          trap - INT
+          return 1
+        fi
+        case "$key" in
+          '[A'|'[D')
+            selected=$((selected - 1))
+            if [[ $selected -lt 0 ]]; then
+              selected=$(( ${#options[@]} - 1 ))
+            fi
+            ;;
+          '[B'|'[C')
+            selected=$((selected + 1))
+            if [[ $selected -ge ${#options[@]} ]]; then
+              selected=0
+            fi
+            ;;
+        esac
+        ;;
+      '')
+        break
+        ;;
+    esac
+  done
+
+  echo -ne "\r\033[K$prompt ${options[$selected]}\n"
+  tput cnorm
+  trap - INT
+
+  REPLY="${options[$selected]}"
+  return 0
 }
