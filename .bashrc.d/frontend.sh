@@ -2,8 +2,11 @@
 run_npm() {
   change_dir_if_needed "$1"
 
-  open_browser "http://localhost:5173"
-  npm run dev
+  if [[ "$NO_BROWSER" == "1" ]]; then
+    npm run dev
+  else
+    npm run dev -- --open
+  fi
 }
 
 create_vite_project() {
@@ -79,8 +82,7 @@ create_vite_project() {
     echo "✓ Project setup complete!"
     echo "Starting dev server..."
     echo ""
-    open_browser "http://localhost:5173"
-    npm run dev
+    run_npm
   else
     echo "Error: Failed to create project." >&2
     return 1
