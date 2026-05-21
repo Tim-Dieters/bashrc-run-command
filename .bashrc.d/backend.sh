@@ -61,6 +61,42 @@ check_docker() {
   return 0
 }
 
+cleanup_symfony_server_state() {
+  # Ask Symfony to stop known servers first
+  symfony local:server:stop --all >/dev/null 2>&1 || true
+
+  # Try to terminate any php-cgi workers that Symfony still says are running
+  local status_output
+  status_output="$(symfony local:server:status 2>/dev/null || true)"
+  local pids
+  pids="$(printf "%s\n" "$status_output" | sed -n 's/^[[:space:]]*PID \([0-9]\+\):.*/\1/p')"
+
+  if [[ -n "$pids" ]]; then
+    while IFS= read -r pid; do
+      [[ -n "$pid" ]] || continue
+      taskkill //PID "$pid" //T //F >/dev/null 2>&1 || true
+    done <<< "$pids"
+  fi
+
+  # Some windows workers are sometimes not listed for some reason in the status so stop any leftover php-cgi
+  taskkill //IM php-cgi.exe //T //F >/dev/null 2>&1 || true
+
+  # Remove stale pid files for the current project directory only
+  local win_dir
+  win_dir="$(pwd -W 2>/dev/null || pwd)"
+  win_dir="${win_dir//\//\\}"
+  local escaped_win_dir
+  escaped_win_dir="${win_dir//\\/\\\\}"
+
+  local pid_file
+  while IFS= read -r -d '' pid_file; do
+    [[ -f "$pid_file" ]] || continue
+    if grep -Fq "\"dir\": \"$escaped_win_dir\"" "$pid_file"; then
+      rm -f "$pid_file"
+    fi
+  done < <(find "$HOME/.symfony5/var" -type f -name '*.pid' -print0 2>/dev/null)
+}
+
 run_symfony() {
   change_dir_if_needed "$1"
 
@@ -80,7 +116,7 @@ run_symfony() {
   open_browser "http://localhost:8080/index.php?route=/database/structure&db=app"
   open_browser "http://localhost:8000/_profiler"
 
-  symfony server:stop
+  cleanup_symfony_server_state
   symfony serve
 }
 
@@ -89,7 +125,7 @@ stop_symfony() {
 
   project_naam=$(ensure_project_name) || return 1
 
-  symfony server:stop
+  cleanup_symfony_server_state
   docker-compose -p "$project_naam" down
   echo "Stopped"
 }
